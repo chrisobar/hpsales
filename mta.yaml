@@ -3,93 +3,95 @@ ID: hpsales
 description: A simple CAP project.
 version: 1.0.0
 modules:
-- name: hpsales-srv
-  type: nodejs
-  path: gen/srv
-  requires:
-  - name: hpsales-auth
-  - name: hpsales-db
-  provides:
-  - name: srv-api
-    properties:
-      srv-url: ${default-url}
-  parameters:
-    buildpack: nodejs_buildpack
-    instances: 1
-  build-parameters:
-    builder: npm-ci
-- name: hpsales-db-deployer
-  type: hdb
-  path: gen/db
-  requires:
-  - name: hpsales-db
-  parameters:
-    buildpack: nodejs_buildpack
-- name: hpsales-destination-content
-  type: com.sap.application.content
-  requires:
-  - name: hpsales-destination-service
+  - name: hpsales-srv
+    type: nodejs
+    path: gen/srv
+    requires:
+      - name: hpsales-auth
+      - name: hpsales-db
+      - name: hpsales-destination-service
+    provides:
+      - name: srv-api
+        properties:
+          srv-url: ${default-url}
     parameters:
-      content-target: true
-  - name: hpsales_html_repo_host
+      buildpack: nodejs_buildpack
+      instances: 1
+    build-parameters:
+      builder: npm-ci
+  - name: hpsales-db-deployer
+    type: hdb
+    path: gen/db
+    requires:
+      - name: hpsales-db
     parameters:
-      service-key:
-        name: hpsales_html_repo_host-key
-  - name: hpsales-auth
+      buildpack: nodejs_buildpack
+  - name: hpsales-destination-content
+    type: com.sap.application.content
+    requires:
+      - name: hpsales-destination-service
+        parameters:
+          content-target: true
+      - name: hpsales_html_repo_host
+        parameters:
+          service-key:
+            name: hpsales_html_repo_host-key
+      - name: hpsales-auth
+        parameters:
+          service-key:
+            name: hpsales-auth-key
     parameters:
-      service-key:
-        name: hpsales-auth-key
-  parameters:
-    content:
-      instance:
-        destinations:
-        - Name: hpsales_hpsales_html_repo_host
-          ServiceInstanceName: hpsales-html5-app-host-service
-          ServiceKeyName: hpsales_html_repo_host-key
-          sap.cloud.service: hpsales
-        - Authentication: OAuth2UserTokenExchange
-          Name: hpsales_hpsales_auth
-          ServiceInstanceName: hpsales-auth
-          ServiceKeyName: hpsales-auth-key
-          sap.cloud.service: hpsales
-        existing_destinations_policy: ignore
-  build-parameters:
-    no-source: true
+      content:
+        instance:
+          destinations:
+            - Name: hpsales_hpsales_html_repo_host
+              ServiceInstanceName: hpsales-html5-app-host-service
+              ServiceKeyName: hpsales_html_repo_host-key
+              sap.cloud.service: hpsales
+            - Authentication: OAuth2UserTokenExchange
+              Name: hpsales_hpsales_auth
+              ServiceInstanceName: hpsales-auth
+              ServiceKeyName: hpsales-auth-key
+              sap.cloud.service: hpsales
+          existing_destinations_policy: ignore
+    build-parameters:
+      no-source: true
 resources:
-- name: hpsales-auth
-  type: org.cloudfoundry.managed-service
-  parameters:
-    config:
-      tenant-mode: dedicated
-      xsappname: hpsales-${org}-${space}
-    path: ./xs-security.json
-    service: xsuaa
-    service-plan: application
-- name: hpsales-db
-  type: com.sap.xs.hdi-container
-  parameters:
-    service: hana
-    service-plan: hdi-shared
-- name: hpsales-destination-service
-  type: org.cloudfoundry.managed-service
-  parameters:
-    config:
-      HTML5Runtime_enabled: true
-      version: 1.0.0
-    service: destination
-    service-name: hpsales-destination-service
-    service-plan: lite
-- name: hpsales_html_repo_host
-  type: org.cloudfoundry.managed-service
-  parameters:
-    service: html5-apps-repo
-    service-name: hpsales-html5-app-host-service
-    service-plan: app-host
+  - name: hpsales-auth
+    type: org.cloudfoundry.managed-service
+    parameters:
+      config:
+        tenant-mode: dedicated
+        xsappname: hpsales-${org}-${space}
+      path: ./xs-security.json
+      service: xsuaa
+      service-plan: application
+  - name: hpsales-db
+    type: com.sap.xs.hdi-container
+    parameters:
+      service: hana
+      service-plan: hdi-shared
+  - name: hpsales-destination-service
+    type: org.cloudfoundry.managed-service
+    parameters:
+      config:
+        HTML5Runtime_enabled: true
+        # Add here the Integ suite/API Service   ---- Christian Obar
+        version: 1.0.0
+      service: destination
+      service-name: hpsales-destination-service
+      service-plan: lite
+  - name: hpsales_html_repo_host
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: html5-apps-repo
+      service-name: hpsales-html5-app-host-service
+      service-plan: app-host
 parameters:
   enable-parallel-deployments: true
 build-parameters:
   before-all:
-  - builder: custom
-    commands:
-    - npm ci
-    - npx cds build --production
+    - builder: custom
+      commands:
+        - npm ci
+        - npx cds build --production

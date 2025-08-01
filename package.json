@@ -6,10 +6,13 @@
   "license": "UNLICENSED",
   "private": true,
   "dependencies": {
-    "@sap/cds": "^9",
-    "express": "^4",
     "@cap-js/hana": "^2",
-    "@sap/xssec": "^4"
+    "@sap-cloud-sdk/http-client": "^4.1.1",
+    "@sap/cds": "^9",
+    "@sap/xssec": "^4",
+    "express": "^4",
+    "tsx": "^4.20.3",
+    "typescript": "^5.9.2"
   },
   "engines": {
     "node": ">=20"
@@ -25,6 +28,16 @@
   },
   "cds": {
     "requires": {
+      "my_destination": {
+        "kind": "destination",
+        "credentials": {
+          "URL": "https://my-destination.example.com",
+          "ProxyType": "Internet",
+          "Authentication": "OAuth2ClientCredentials",
+          "ClientID": "my-client-id",
+          "ClientSecret": "my-client-secret"
+        }
+      },
       "[production]": {
         "auth": "xsuaa"
       }
