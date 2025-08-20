@@ -26,7 +26,6 @@ export default async function initializeSalesOrders() {
       },
     });
     const parsedData = await parseXml(response.data);
-    console.log(JSON.stringify(parsedData));
     const salesDocuments: SalesOrderTyped[] = transformXML(parsedData);
     return salesDocuments;
   } catch (error: any) {
